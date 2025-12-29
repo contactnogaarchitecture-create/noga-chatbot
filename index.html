@@ -594,26 +594,29 @@ faq_reponse: {
             afficherTyping();
             
             setTimeout(async () => {
-                retirerTyping();
-                
-                const message = typeof etape.message === 'function' 
-                    ? await etape.message(donneesUtilisateur) 
-                    : etape.message;
-                
-                if (message) {
-                    ajouterMessage(message, false);
-                }
-                
-                if (etape.type === "buttons") {
-                    afficherBoutons(etape.options);
-                    chatInput.style.display = 'none';
-                } else if (etape.type === "text") {
-                    chatInput.style.display = 'flex';
-                    messageInput.focus();
-                } else if (etape.type === "final") {
-                    chatInput.style.display = 'none';
-                }
-            }, 1000);
+    // NE PAS retirer le typing ici !
+    
+    const message = typeof etape.message === 'function' 
+        ? await etape.message(donneesUtilisateur)  // Attend OpenAI avec typing visible
+        : etape.message;
+    
+    // Retirer le typing APRÈS avoir reçu la réponse
+    retirerTyping();
+    
+    if (message) {
+        ajouterMessage(message, false);
+    }
+    
+    if (etape.type === "buttons") {
+        afficherBoutons(etape.options);
+        chatInput.style.display = 'none';
+    } else if (etape.type === "text") {
+        chatInput.style.display = 'flex';
+        messageInput.focus();
+    } else if (etape.type === "final") {
+        chatInput.style.display = 'none';
+    }
+}, 200);
         }
         
         async function envoyerAMake(donnees, type) {
