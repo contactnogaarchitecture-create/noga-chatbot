@@ -20,10 +20,11 @@ body {
 /* Fenêtre chat dans iframe */
 #chatWindow {
   width: 100%;
-  height: 100%;
+  height: 100dvh;
   background: #f5f3f0;
   display: flex;
   flex-direction: column;
+  overflow: hidden; 
 }
 
 /* meilleure hauteur mobile */
@@ -32,9 +33,10 @@ body {
 }
 
 #chatMessages {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0; /* ✅ IMPORTANT iOS : évite input coupé */
   padding: 26px 18px;
+  padding-bottom: 10px;
   overflow-y: auto;
   overflow-x: hidden;
   background: #f5f3f0;
@@ -140,13 +142,14 @@ body {
 }
 
 /* Input */
-#chatInput {
+#chatInput{
+  flex: 0 0 auto;
   padding: 16px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom)); /* ✅ iPhone */
+  padding-bottom: calc(24px + env(safe-area-inset-bottom)); /* ✅ plus généreux */
+  position: sticky;        /* ✅ reste visible même si Safari “glisse” */
+  bottom: 0;
   background: white;
   border-top: 1px solid #e5e3e0;
-  display: none;
-  gap: 10px;
 }
 
 #messageInput {
