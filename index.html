@@ -237,6 +237,24 @@ body {
   .message, .message.user { font-size: 16px; }
   .response-btn { font-size: 15px !important; }
 }
+    /* ===== FIX MOBILE : bouton "Envoyer" coupé ===== */
+@media (hover: none) and (pointer: coarse) {
+  #chatInput {
+    gap: 8px;                 /* un peu moins d’espace */
+  }
+
+  #messageInput {
+    min-width: 0;             /* OBLIGATOIRE en flex */
+    flex: 1 1 auto;
+  }
+
+  #sendBtn {
+    flex: 0 0 auto;           /* ne se fait pas écraser */
+    white-space: nowrap;      /* jamais de coupe */
+    padding: 10px 10px;       /* plus compact */
+    font-size: 13px;
+  }
+}
   </style>
 </head>
 
