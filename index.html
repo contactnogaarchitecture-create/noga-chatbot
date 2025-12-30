@@ -190,7 +190,6 @@
     @media (max-width: 768px) {
       #chatMessages { padding: 16px 14px; }
 
-      .avatar { display: none; }
       .message-container { gap: 0; }
 
       .message, .message.user { font-size: 12px; padding: 10px 12px; }
@@ -206,6 +205,44 @@
   .avatar {
     display: flex !important;
   }
+}
+    /* ===== Fix hauteur iOS iframe (évite l'input coupé) ===== */
+html, body { height: 100%; }
+#chatWindow { height: 100%; } /* pas 100vh */
+
+/* utilise dvh si dispo (meilleure gestion mobile) */
+@supports (height: 100dvh) {
+  #chatWindow { height: 100dvh; }
+}
+
+/* Safe area iPhone : évite que "Envoyer" soit sous la barre */
+#chatInput {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+/* ===== VRAI MOBILE (tactile) : PAS basé sur la largeur iframe ===== */
+@media (hover: none) and (pointer: coarse) {
+  .avatar { display: none !important; }
+  .message-container { gap: 0 !important; }
+
+  .message, .message.user {
+    font-size: 12.5px;
+    padding: 10px 12px;
+  }
+
+  .response-btn {
+    font-size: 12.5px;
+    padding: 9px 12px;
+  }
+
+  #messageInput { font-size: 12.5px; }
+  .typing-indicator { margin-left: 0 !important; }
+}
+
+/* ===== DESKTOP (souris) : force avatar visible même si iframe étroite ===== */
+@media (hover: hover) and (pointer: fine) {
+  .avatar { display: flex !important; }
+  .message, .message.user { font-size: 16px; } /* ta demande desktop */
 }
   </style>
 </head>
