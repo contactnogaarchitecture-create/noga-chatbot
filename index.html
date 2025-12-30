@@ -320,6 +320,73 @@
         font-size: 28px;
               }
 }
+        /* ---------- BASE DESKTOP (par défaut) ---------- */
+
+/* Fenêtre desktop : largeur fixe premium */
+#chatWindow {
+  width: 420px;
+  max-width: 420px;
+  height: 100vh;
+}
+
+/* Avatar visible sur desktop */
+.avatar { display: flex; }
+
+/* Bouton close visible + centré dans un cercle */
+#closeBtn {
+  display: flex !important;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid #e5e3e0;
+  color: #5a4a3a;
+  font-size: 28px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  z-index: 20;
+}
+
+/* Typing aligné sous les messages bot (desktop) */
+.typing-indicator { margin-left: 47px; }
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 768px) {
+  html, body { overflow-x: hidden; }
+  #chatWindow {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #chatMessages { padding: 16px 14px !important; } /* symétrique */
+  
+  /* Bulle plus petite */
+  #chatBubble { width: 50px; height: 50px; }
+
+  /* Avatar caché UNIQUEMENT sur mobile */
+  .avatar { display: none !important; }
+
+  /* On enlève les décalages prévus pour l’avatar */
+  .message-container { gap: 10px; padding-left: 0 !important; }
+  .typing-indicator { margin-left: 0 !important; }
+
+  /* Boutons : pas de marge asymétrique */
+  .response-buttons {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Texte un peu plus petit sur mobile (mais pas écrasé) */
+  .message { font-size: 14px; padding: 12px 14px; }
+  .response-btn { font-size: 14px; padding: 12px 14px; }
+}
         
     </style>
 </head>
@@ -327,7 +394,7 @@
     <div id="chatBubble"></div>
     
     <div id="chatWindow">
-    <button id="closeBtn" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: #5a4a3a; font-size: 32px; cursor: pointer; z-index: 10;">×</button>
+    <button id="closeBtn" aria-label="Fermer">×</button>
         
         <div id="chatMessages"></div>
         
