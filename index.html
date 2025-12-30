@@ -93,7 +93,6 @@
 }
 
 #closeBtn {
-     display: none;
     background: none;
     border: none;
     color: #5a4a3a;
@@ -269,57 +268,43 @@
     }
     
     /* Responsive */
+    /* Responsive */
     @media (max-width: 768px) {
         #chatWindow {
             max-width: 100%;
         }
         
-        #chatBubble {
-            width: 50px;
-            height: 50px;
+        /* MASQUER L'AVATAR SUR MOBILE */
+        .avatar {
+            display: none;
         }
 
-        /* MASQUER L'AVATAR SUR MOBILE */
-    .avatar {
-        display: none;  /* ← Masque l'avatar */
-    }
-
         /* Messages du bot avec marge à gauche */
-    .message-container {
-        padding-left: 15px;  /* ← Marge à gauche */
-    }
-        /* AJOUTE CES LIGNES */
-    .message {
-        font-size: 13px;      /* Texte plus petit */
-        padding: 10px 14px;   /* Moins de padding */
-    }
-
-        .response-buttons {
-        margin-left: 47px;  /* ← 42px pour mobile */
-    }
+        .message-container {
+            padding-left: 15px;
+        }
         
-    .response-btn {
-        font-size: 13px;      /* Boutons plus petits */
-        padding: 10px 16px;
+        /* Messages plus compacts */
+        .message {
+            font-size: 14px;
+            padding: 12px 16px;
+        }
+
+        /* Boutons avec marge */
+        .response-buttons {
+            margin-left: 15px;
+            margin-right: 20px;
+        }
+        
+        .response-btn {
+            font-size: 14px;
+            padding: 12px 18px;
+        }
+        
+        #chatMessages {
+            padding: 20px 15px;
+        }
     }
-    
-    #chatMessages {
-        padding: 15px 10px;   /* Moins d'espace */
-    }
-    
-    .avatar {
-        width: 28px;          /* Avatar plus petit */
-        height: 28px;
-    }
-    
-    .avatar img {
-        width: 28px;
-        height: 28px;
-    }
-         #closeBtn {
-        font-size: 28px;
-              }
-}
     </style>
 </head>
 <body>
@@ -624,27 +609,35 @@ faq_reponse: {
         }
         
         async function allerEtape(nouvelleEtape) {
-            etapeActuelle = nouvelleEtape;
-            const etape = parcours[etapeActuelle];
-            
-            if (etape.type === "condition") {
-                const prochaine = etape.condition(donneesUtilisateur);
-                allerEtape(prochaine);
-                return;
-            }
-            
-            afficherTyping();
-            
-            setTimeout(async () => {
-    // NE PAS retirer le typing ici !
+    etapeActuelle = nouvelleEtape;
+    const etape = parcours[etapeActuelle];
+    
+    if (etape.type === "condition") {
+        const prochaine = etape.condition(donneesUtilisateur);
+        allerEtape(prochaine);
+        return;
+    }
+    
+    console.log('🔵 ÉTAPE 1: Afficher typing');
+    afficherTyping();
+    
+    console.log('🔵 ÉTAPE 2: Attendre 500ms');
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    console.log('🔵 ÉTAPE 3: Appeler message (DÉBUT)');
+    const debut = Date.now();
     
     const message = typeof etape.message === 'function' 
-        ? await etape.message(donneesUtilisateur)  // Attend OpenAI avec typing visible
+        ? await etape.message(donneesUtilisateur) 
         : etape.message;
     
-    // Retirer le typing APRÈS avoir reçu la réponse
+    const fin = Date.now();
+    console.log(`🔵 ÉTAPE 4: Message reçu (durée: ${fin - debut}ms)`);
+    
+    console.log('🔵 ÉTAPE 5: Retirer typing');
     retirerTyping();
     
+    console.log('🔵 ÉTAPE 6: Afficher message');
     if (message) {
         ajouterMessage(message, false);
     }
@@ -658,8 +651,8 @@ faq_reponse: {
     } else if (etape.type === "final") {
         chatInput.style.display = 'none';
     }
-}, 200);
-        }
+}
+
         
         async function envoyerAMake(donnees, type) {
     const payload = {
@@ -694,7 +687,7 @@ async function envoyerQuestionOpenAI(question) {
         question: question,
         contexte: "NOGA Architecture - Cabinet d'architecture d'intérieur sur la Côte d'Azur"
     };
-
+afficherTyping();
     try {
         const response = await fetch(WEBHOOK_FAQ_URL, {
             method: "POST",
@@ -715,7 +708,7 @@ async function envoyerQuestionOpenAI(question) {
         if (!texte || texte.trim() === "") {
             return "Je n'ai pas pu obtenir de réponse.";
         }
-
+retirerTyping();
         // Nettoyage
         const cleaned = texte.replace(/^["']|["']$/g, "").trim();
         console.log('✅ Texte nettoyé:', cleaned);
@@ -729,16 +722,7 @@ async function envoyerQuestionOpenAI(question) {
 }
         
         // === ÉVÉNEMENTS ===
-        // Ouvrir automatiquement si dans une iframe
-if (window.self !== window.top) {
-    chatWindow.style.display = 'flex';
-    chatBubble.style.display = 'none';
-    if (chatMessages.children.length === 0) {
-        allerEtape('accueil');
-    }
-}
-
-chatBubble.addEventListener('click', () => {
+        chatBubble.addEventListener('click', () => {
             chatWindow.style.display = 'flex';
             if (chatMessages.children.length === 0) {
                 allerEtape('accueil');
