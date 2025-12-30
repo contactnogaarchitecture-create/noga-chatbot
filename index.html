@@ -1,841 +1,584 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NOGA Architecture - Chat</title>
-    <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOGA Architecture - Chat</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: #f5f3f0;
-        height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f3f0;
+      height: 100vh;
+      overflow: hidden; /* important dans une iframe */
     }
-    
-    #chatBubble {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 70px;
-    height: 70px;
-    background: #5a4a3a;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s;
-}
 
-#chatBubble:hover {
-    transform: scale(1.05);
-}
-
-/* La bulle blanche (plus petite) */
-#chatBubble::after {
-    content: "";
-    width: 24px;
-    height: 24px;
-    background: white;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-#chatBubble::before {
-    content: "";
-    position: absolute;
-    bottom: 17px;   /* ← Augmenté de 16px à 19px */
-    left: 15px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 8px 8px 0;
-    border-color: transparent white transparent transparent;
-    transform: rotate(70deg);
-}
-    
-    #chatBubble img {
-    width: 60px;  /* Presque la taille du container (70px) */
-    height: 60px;
-    object-fit: contain;
-    padding: 5px;  /* Un peu d'espace autour */
-}
-    
+    /* On affiche directement la fenêtre (pas de bulle ici) */
     #chatWindow {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        width: 100%;
-        max-width: 450px;
-        height: 100vh;
-        background: #f5f3f0;
-        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
-        display: none;
-        flex-direction: column;
+      width: 100%;
+      height: 100vh;
+      background: #f5f3f0;
+      display: flex;
+      flex-direction: column;
     }
-    
-   #chatHeader {
-    background: transparent;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: flex-end;  /* Bouton à droite */
-    align-items: center;
-    border-bottom: none;
-}
 
-#closeBtn {
-     display: none;
-    background: none;
-    border: none;
-    color: #5a4a3a;
-    font-size: 32px;
-    cursor: pointer;
-    font-weight: 300;
-    line-height: 1;
-}
-    
     #chatMessages {
-        flex: 1;
-        padding: 30px 20px;
-        overflow-y: auto;
-        background: #f5f3f0;
+      flex: 1;
+      padding: 26px 18px;
+      overflow-y: auto;
+      background: #f5f3f0;
+      overflow-x: hidden;
     }
-    
+
     .message-container {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        margin-bottom: 20px;
-        animation: fadeIn 0.4s;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 18px;
+      animation: fadeIn 0.25s;
     }
-    
+
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    
-    .avatar {
-    width: 35px;
-    height: 35px;
-    flex-shrink: 0;
-    background: white;  /* ← Fond marron comme le chatBubble */
-    border-radius: 50%;   /* ← Cercle parfait au lieu de 8px */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
 
-.avatar img {
-    width: 35px;
-    height: 35px;
-    object-fit: contain;
-}
-    
+    .avatar {
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .avatar img { width: 34px; height: 34px; object-fit: contain; }
+
     .message {
-        background: white;
-        color: #5a4a3a;
-        padding: 16px 20px;
-        border-radius: 12px;
-        max-width: 80%;
-        white-space: pre-line;
-        line-height: 1.6;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        border: 1px solid #e5e3e0;
+      background: white;
+      color: #5a4a3a;
+      padding: 14px 16px;
+      border-radius: 12px;
+      max-width: 80%;
+      white-space: pre-line;
+      line-height: 1.55;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border: 1px solid #e5e3e0;
+      font-size: 15px;
     }
-    
-    .message.user {
-        background: #c4a77d;
-        color: white;
-        margin-left: auto;
-        border: none;
-    }
-    
+
     .user-message-container {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 20px;
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 14px;
     }
-    
+
+    .message.user {
+      background: #c4a77d;
+      color: white;
+      border: none;
+      max-width: 80%;
+      font-size: 15px;
+      padding: 14px 16px;
+      border-radius: 12px;
+    }
+
+    /* ✅ Boutons alignés à droite comme des réponses */
+    .response-buttons-wrap {
+      display: flex;
+      justify-content: flex-end;
+      margin: 10px 0 18px 0;
+    }
+
     .response-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 15px;
-    margin-left: auto;  /* ← Pousse à droite */
-    margin-right: 20px;
-    max-width: 280px;
-}
-
-.response-btn {
-    background: #c4a77d;
-    color: white;
-    border: none;
-    padding: 16px 24px;
-    border-radius: 8px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.3s;
-    font-size: 15px;
-    font-weight: 500;
-    width: 100%;  /* Prend toute la largeur du container (320px max) */
-}
-
-.response-btn:hover {
-    background: #b39872;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(196, 167, 125, 0.3);
-}
-    
-    #chatInput {
-        padding: 20px;
-        background: white;
-        border-top: 1px solid #e5e3e0;
-        display: none;
-        gap: 12px;
-    }
-    
-    #messageInput {
-        flex: 1;
-        padding: 14px 20px;
-        border: 1px solid #e5e3e0;
-        border-radius: 8px;
-        font-size: 15px;
-        outline: none;
-        background: #f5f3f0;
-        color: #5a4a3a;
-    }
-    
-    #messageInput:focus {
-        border-color: #c4a77d;
-        background: white;
-    }
-    
-    #sendBtn {
-        background: #c4a77d;
-        color: white;
-        border: none;
-        padding: 14px 28px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 15px;
-    }
-    
-    #sendBtn:hover {
-        background: #b39872;
-    }
-    
-    .typing-indicator {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 16px 20px;
-        background: white;
-        border-radius: 12px;
-        max-width: 80px;
-        margin-left: 47px;
-        border: 1px solid #e5e3e0;
-    }
-    
-    .typing-indicator span {
-        width: 8px;
-        height: 8px;
-        background: #c4a77d;
-        border-radius: 50%;
-        animation: typing 1.4s infinite;
-    }
-    
-    .typing-indicator span:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-    
-    .typing-indicator span:nth-child(3) {
-        animation-delay: 0.4s;
-    }
-    
-    @keyframes typing {
-        0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-        30% { transform: translateY(-8px); opacity: 1; }
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-        #chatWindow {
-            max-width: 100%;
-        }
-        
-        #chatBubble {
-            width: 50px;
-            height: 50px;
-        }
-
-        /* MASQUER L'AVATAR SUR MOBILE */
-    .avatar {
-        display: none;  /* ← Masque l'avatar */
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 260px;   /* moins large */
+      width: 100%;
+      align-items: stretch;
     }
 
-        /* Messages du bot avec marge à gauche */
-    .message-container {
-        padding-left: 15px;  /* ← Marge à gauche */
-    }
-        /* AJOUTE CES LIGNES */
-    .message {
-        font-size: 13px;      /* Texte plus petit */
-        padding: 10px 14px;   /* Moins de padding */
-    }
-
-        .response-buttons {
-        margin-left: 47px;  /* ← 42px pour mobile */
-    }
-        
     .response-btn {
-        font-size: 13px;      /* Boutons plus petits */
-        padding: 10px 16px;
+      background: #c4a77d;
+      color: white;
+      border: none;
+      padding: 12px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      font-size: 14px;
+      font-weight: 600;
+      width: 100%;
     }
-    
-    #chatMessages {
-        padding: 15px 10px;   /* Moins d'espace */
+
+    .response-btn:hover {
+      background: #b39872;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(196,167,125,0.25);
     }
-    
-    .avatar {
-        width: 28px;          /* Avatar plus petit */
-        height: 28px;
+
+    #chatInput {
+      padding: 16px;
+      background: white;
+      border-top: 1px solid #e5e3e0;
+      display: none;
+      gap: 10px;
     }
-    
-    .avatar img {
-        width: 28px;
-        height: 28px;
+
+    #messageInput {
+      flex: 1;
+      padding: 12px 14px;
+      border: 1px solid #e5e3e0;
+      border-radius: 10px;
+      font-size: 14px;
+      outline: none;
+      background: #f5f3f0;
+      color: #5a4a3a;
     }
-         #closeBtn {
-        font-size: 28px;
-              }
-}
-        /* ---------- BASE DESKTOP (par défaut) ---------- */
 
-/* Fenêtre desktop : largeur fixe premium */
-#chatWindow {
-  width: 420px;
-  max-width: 420px;
-  height: 100vh;
-}
+    #messageInput:focus {
+      border-color: #c4a77d;
+      background: white;
+    }
 
-/* Avatar visible sur desktop */
-.avatar { display: flex; }
+    #sendBtn {
+      background: #c4a77d;
+      color: white;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    #sendBtn:hover { background: #b39872; }
 
-/* Bouton close visible + centré dans un cercle */
-#closeBtn {
-  display: flex !important;
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.85);
-  border: 1px solid #e5e3e0;
-  color: #5a4a3a;
-  font-size: 28px;
-  line-height: 1;
-  padding: 0;
-  cursor: pointer;
-  z-index: 20;
-}
+    .typing-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid #e5e3e0;
+      width: fit-content;
+      margin: 0 0 14px 44px; /* sous les messages bot (avatar présent desktop) */
+    }
 
-/* Typing aligné sous les messages bot (desktop) */
-.typing-indicator { margin-left: 47px; }
+    .typing-indicator span {
+      width: 7px;
+      height: 7px;
+      background: #c4a77d;
+      border-radius: 50%;
+      animation: typing 1.2s infinite;
+      opacity: 0.7;
+    }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
 
-/* ---------- MOBILE ---------- */
-@media (max-width: 768px) {
-  html, body { overflow-x: hidden; }
-  #chatWindow {
-    width: 100%;
-    max-width: 100%;
-  }
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
 
-  #chatMessages { padding: 16px 14px !important; } /* symétrique */
-  
-  /* Bulle plus petite */
-  #chatBubble { width: 50px; height: 50px; }
+    /* ✅ Mobile : police plus petite + avatar masqué */
+    @media (max-width: 768px) {
+      #chatMessages { padding: 16px 14px; }
 
-  /* Avatar caché UNIQUEMENT sur mobile */
-  .avatar { display: none !important; }
+      .avatar { display: none; }
+      .message-container { gap: 0; }
 
-  /* On enlève les décalages prévus pour l’avatar */
-  .message-container { gap: 10px; padding-left: 0 !important; }
-  .typing-indicator { margin-left: 0 !important; }
+      .message, .message.user { font-size: 13px; padding: 12px 14px; }
+      .response-btn { font-size: 13px; padding: 11px 12px; }
+      #messageInput { font-size: 13px; }
 
-  /* Boutons : pas de marge asymétrique */
-  .response-buttons {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    max-width: 100% !important;
-  }
-
-  /* Texte un peu plus petit sur mobile (mais pas écrasé) */
-  .message { font-size: 14px; padding: 12px 14px; }
-  .response-btn { font-size: 14px; padding: 12px 14px; }
-}
-        
-    </style>
+      .typing-indicator { margin-left: 0; }
+      .response-buttons { max-width: 90%; } /* garde à droite sans prendre toute la largeur */
+    }
+  </style>
 </head>
+
 <body>
-    <div id="chatBubble"></div>
-    
-    <div id="chatWindow">
-    <button id="closeBtn" aria-label="Fermer">×</button>
-        
-        <div id="chatMessages"></div>
-        
-        <div id="chatInput">
-            <input type="text" id="messageInput" placeholder="Votre réponse...">
-            <button id="sendBtn">Envoyer</button>
-        </div>
+  <div id="chatWindow">
+    <div id="chatMessages"></div>
+
+    <div id="chatInput">
+      <input type="text" id="messageInput" placeholder="Votre réponse..." />
+      <button id="sendBtn">Envoyer</button>
     </div>
-    
-    <script>
-        // === CONFIGURATION ===
-        const WEBHOOK_PROJET_URL = 'https://hook.eu1.make.com/57kfoul8689nxs8tmx49zeeq6h1gahsz';
-const WEBHOOK_FAQ_URL = 'https://hook.eu1.make.com/acnvakdpcuo5kx66lefs0j0v9jku49wj';
-        const CALENDLY_URL = 'https://calendly.com/contact-nogaarchitecture/30min';
-        const LOGO_URL = 'https://i.ibb.co/7dVBNZSV/Capture-d-e-cran-2025-07-07-a-10-44-30.png';
-        
-        // === PARCOURS ===
-        const parcours = {
-            accueil: {
-                message: "Bienvenue chez NOGA Architecture, cabinet d'architecture d'intérieur sur la Côte d'Azur.\n\nComment puis-je vous accompagner ?",
-                type: "buttons",
-                options: [
-                    { texte: "Décrire mon projet", valeur: "projet", suivant: "info_prenom" },
-                    { texte: "Prendre rendez-vous", valeur: "rdv", suivant: "rdv_prenom" },
-                    { texte: "Poser une question", valeur: "faq", suivant: "faq_question" }
-                ]
-            },
-            
-            // === PARCOURS PROJET ===
-            info_prenom: {
-                message: "Très bien ! Je vais vous guider pour identifier l'accompagnement idéal.\nQuel est votre prénom ?",
-                type: "text",
-                variable: "prenom",
-                suivant: "info_ville"
-            },
-            info_ville: {
-                message: (d) => `Enchanté ${d.prenom} !\nDans quelle ville se situe votre projet ?`,
-                type: "text",
-                variable: "ville",
-                suivant: "info_type_bien"
-            },
-            info_type_bien: {
-                message: "De quel type de bien s'agit-il ?",
-                type: "buttons",
-                variable: "type_bien",
-                options: [
-                    { texte: "Appartement", valeur: "Appartement", suivant: "info_surface" },
-                    { texte: "Maison", valeur: "Maison", suivant: "info_surface" },
-                    { texte: "Local commercial", valeur: "Local commercial", suivant: "info_surface" },
-                    { texte: "Autre", valeur: "Autre", suivant: "info_surface" }
-                ]
-            },
-            info_surface: {
-                message: "Quelle est la surface approximative du bien (en m²) ?",
-                type: "text",
-                variable: "surface",
-                suivant: "choix_service"
-            },
-            choix_service: {
-                message: (d) => `Merci!\n\nChez NOGA Architecture, nous proposons trois niveaux d'accompagnement :\n\n🏆 Accompagnement complet : Notre architecte conçoit l'intégralité de votre projet et nous coordonnons toute la réalisation avec nos entreprises partenaires. Un seul interlocuteur du début à la fin.\n\n🎨 Architecture d'intérieur : Notre architecte crée la conception complète (plans, matériaux, finitions). Vous recevez un dossier complet et vous gérez ensuite la réalisation avec les artisans de votre choix.\n\n🔧 Coordination de travaux : Vous avez déjà vos plans ou une vision très précise. Nous coordonnons l'ensemble des travaux avec nos entreprises partenaires ou les vôtres.\n\nQuel accompagnement vous correspond le mieux ?`,
-                type: "buttons",
-                variable: "service",
-                options: [
-                    { texte: "Accompagnement complet", valeur: "Accompagnement complet", suivant: "gamme" },
-                    { texte: "Architecture d'intérieur", valeur: "Architecture d'intérieur", suivant: "gamme" },
-                    { texte: "Coordination de travaux", valeur: "Coordination de travaux", suivant: "gamme" },
-                ]
-            },
-            gamme: {
-                message: "Excellent choix ! Et quel niveau de finitions recherchez-vous ?\n\n⭐ Standard : Matériaux fonctionnels, budget maîtrisé\n\n⭐⭐ Haut de gamme : Matériaux premium, finitions soignées\n\n⭐⭐⭐ Luxe : Matériaux nobles, sur-mesure",
-                type: "buttons",
-                variable: "gamme",
-                options: [
-                    { texte: "Standard", valeur: "Standard", suivant: "budget_check" },
-                    { texte: "Haut de gamme", valeur: "Haut de gamme", suivant: "budget_check" },
-                    { texte: "Luxe", valeur: "Luxe", suivant: "budget_check" }
-                ]
-            },
-            budget_check: {
-    message: null,
-    type: "condition",
-    condition: (d) => {
-        // Budget uniquement pour Coordination de travaux
-        if (d.service === "Coordination de travaux") {
-            return "budget_travaux";
-        }
-        return "delai";
-    }
-},
-            budget_travaux: {
-                message: "Avez-vous une idée du budget travaux ?",
-                type: "buttons",
-                variable: "budget",
-                options: [
-                    { texte: "Moins de 20 000€", valeur: "< 20k€", suivant: "delai" },
-                    { texte: "Entre 20 000 et 50 000€", valeur: "20-50k€", suivant: "delai" },
-                    { texte: "Entre 50 000 et 100 000€", valeur: "50-100k€", suivant: "delai" },
-                    { texte: "Plus de 100 000€", valeur: "> 100k€", suivant: "delai" },
-                    { texte: "Default", valeur: "Non défini", suivant: "delai" }
-                ]
-            },
-            delai: {
-                message: "Quand souhaitez-vous commencer les travaux ?",
-                type: "buttons",
-                variable: "delai",
-                options: [
-                    { texte: "Dès que possible", valeur: "ASAP", suivant: "description" },
-                    { texte: "1 à 3 mois", valeur: "1-3 mois", suivant: "description" },
-                    { texte: "3 à 6 mois", valeur: "3-6 mois", suivant: "description" }
-                ]
-            },
-            description: {
-                message: (d) => `Pouvez-vous nous décrire votre projet? (vos envies, vos contraintes, vos inspirations...)`,
-                type: "text",
-                variable: "description",
-                suivant: "email"
-            },
-            email: {
-                message: (d) => `Merci ${d.prenom} !\nPour que nous puissions vous recontacter, quel est votre email ?`,
-                type: "text",
-                variable: "email",
-                suivant: "telephone"
-            },
-            telephone: {
-                message: "Et votre numéro de téléphone ?",
-                type: "text",
-                variable: "telephone",
-                suivant: "fin_projet"
-            },
-            fin_projet: {
-                message: async (d) => {
-                    await envoyerAMake(d, 'projet');
-                    return `Merci ${d.prenom} !\n\nVotre demande pour votre ${d.type_bien} de ${d.surface}m² à ${d.ville} a bien été enregistrée.\n\nNous analysons votre projet et vous recontacterons très rapidement par email.\n\nÀ très bientôt ! 🏠`;
-                },
-                type: "final"
-            },
-            
-            // === PARCOURS RDV ===
-            rdv_prenom: {
-                message: "D'accord, prenons rendez-vous!\nQuel est votre prénom ?",
-                type: "text",
-                variable: "prenom_rdv",
-                suivant: "rdv_email"
-            },
-            rdv_email: {
-                message: (d) => `Merci ${d.prenom_rdv} ! Quel est votre email ?`,
-                type: "text",
-                variable: "email_rdv",
-                suivant: "rdv_telephone"
-            },
-            rdv_telephone: {
-    message: "Et votre numéro de téléphone ?",
-    type: "text",
-    variable: "telephone_rdv",
-    suivant: "rdv_redirect"
-},
-rdv_redirect: {
-    message: (d) => {
-        const calendlyURL = `${CALENDLY_URL}?name=${encodeURIComponent(d.prenom_rdv)}&email=${encodeURIComponent(d.email_rdv)}&a1=${encodeURIComponent(d.telephone_rdv)}`;
-        
-        setTimeout(() => {
-            const btnDiv = document.createElement('div');
-            btnDiv.style.cssText = 'display: flex; margin: 15px 0 0 47px;';
-            
-            const btn = document.createElement('a');
+  </div>
+
+  <script>
+    // === CONFIGURATION ===
+    const WEBHOOK_PROJET_URL = "https://hook.eu1.make.com/57kfoul8689nxs8tmx49zeeq6h1gahsz";
+    const WEBHOOK_FAQ_URL    = "https://hook.eu1.make.com/acnvakdpcuo5kx66lefs0j0v9jku49wj";
+    const CALENDLY_URL       = "https://calendly.com/contact-nogaarchitecture/30min";
+    const LOGO_URL           = "https://i.ibb.co/7dVBNZSV/Capture-d-e-cran-2025-07-07-a-10-44-30.png";
+
+    // === PARCOURS ===
+    const parcours = {
+      accueil: {
+        message: "Bienvenue chez NOGA Architecture, cabinet d'architecture d'intérieur sur la Côte d'Azur.\n\nComment puis-je vous accompagner ?",
+        type: "buttons",
+        options: [
+          { texte: "Décrire mon projet", valeur: "projet", suivant: "info_prenom" },
+          { texte: "Prendre rendez-vous", valeur: "rdv", suivant: "rdv_prenom" },
+          { texte: "Poser une question", valeur: "faq", suivant: "faq_question" }
+        ]
+      },
+
+      // === PROJET ===
+      info_prenom: {
+        message: "Très bien ! Je vais vous guider pour identifier l'accompagnement idéal.\nQuel est votre prénom ?",
+        type: "text",
+        variable: "prenom",
+        suivant: "info_ville"
+      },
+      info_ville: {
+        message: (d) => `Enchanté ${d.prenom} !\nDans quelle ville se situe votre projet ?`,
+        type: "text",
+        variable: "ville",
+        suivant: "info_type_bien"
+      },
+      info_type_bien: {
+        message: "De quel type de bien s'agit-il ?",
+        type: "buttons",
+        variable: "type_bien",
+        options: [
+          { texte: "Appartement", valeur: "Appartement", suivant: "info_surface" },
+          { texte: "Maison", valeur: "Maison", suivant: "info_surface" },
+          { texte: "Local commercial", valeur: "Local commercial", suivant: "info_surface" },
+          { texte: "Autre", valeur: "Autre", suivant: "info_surface" }
+        ]
+      },
+      info_surface: {
+        message: "Quelle est la surface approximative du bien (en m²) ?",
+        type: "text",
+        variable: "surface",
+        suivant: "choix_service"
+      },
+      choix_service: {
+        message: () =>
+          `Merci!\n\nChez NOGA Architecture, nous proposons trois niveaux d'accompagnement :\n\n🏆 Accompagnement complet : conception + coordination + réalisation avec nos entreprises partenaires.\n\n🎨 Architecture d'intérieur : conception complète (plans, matériaux, finitions) et vous réalisez avec vos artisans.\n\n🔧 Coordination de travaux : vous avez déjà une base, nous coordonnons les travaux.\n\nQuel accompagnement vous correspond le mieux ?`,
+        type: "buttons",
+        variable: "service",
+        options: [
+          { texte: "Accompagnement complet", valeur: "Accompagnement complet", suivant: "gamme" },
+          { texte: "Architecture d'intérieur", valeur: "Architecture d'intérieur", suivant: "gamme" },
+          { texte: "Coordination de travaux", valeur: "Coordination de travaux", suivant: "gamme" }
+        ]
+      },
+      gamme: {
+        message: "Excellent choix ! Et quel niveau de finitions recherchez-vous ?\n\n⭐ Standard\n\n⭐⭐ Haut de gamme\n\n⭐⭐⭐ Luxe",
+        type: "buttons",
+        variable: "gamme",
+        options: [
+          { texte: "Standard", valeur: "Standard", suivant: "budget_check" },
+          { texte: "Haut de gamme", valeur: "Haut de gamme", suivant: "budget_check" },
+          { texte: "Luxe", valeur: "Luxe", suivant: "budget_check" }
+        ]
+      },
+      budget_check: {
+        message: null,
+        type: "condition",
+        condition: (d) => (d.service === "Coordination de travaux" ? "budget_travaux" : "delai")
+      },
+      budget_travaux: {
+        message: "Avez-vous une idée du budget travaux ?",
+        type: "buttons",
+        variable: "budget",
+        options: [
+          { texte: "Moins de 20 000€", valeur: "< 20k€", suivant: "delai" },
+          { texte: "Entre 20 000 et 50 000€", valeur: "20-50k€", suivant: "delai" },
+          { texte: "Entre 50 000 et 100 000€", valeur: "50-100k€", suivant: "delai" },
+          { texte: "Plus de 100 000€", valeur: "> 100k€", suivant: "delai" }
+        ]
+      },
+      delai: {
+        message: "Quand souhaitez-vous commencer les travaux ?",
+        type: "buttons",
+        variable: "delai",
+        options: [
+          { texte: "Dès que possible", valeur: "ASAP", suivant: "description" },
+          { texte: "1 à 3 mois", valeur: "1-3 mois", suivant: "description" },
+          { texte: "3 à 6 mois", valeur: "3-6 mois", suivant: "description" }
+        ]
+      },
+      description: {
+        message: () => "Pouvez-vous nous décrire votre projet ? (envies, contraintes, inspirations…)",
+        type: "text",
+        variable: "description",
+        suivant: "email"
+      },
+      email: {
+        message: (d) => `Merci ${d.prenom} !\nQuel est votre email ?`,
+        type: "text",
+        variable: "email",
+        suivant: "telephone"
+      },
+      telephone: {
+        message: "Et votre numéro de téléphone ?",
+        type: "text",
+        variable: "telephone",
+        suivant: "fin_projet"
+      },
+      fin_projet: {
+        message: async (d) => {
+          await envoyerAMake(d, "projet");
+          return `Merci ${d.prenom} !\n\nVotre demande a bien été enregistrée.\nNous vous recontactons très rapidement.\n\nÀ très bientôt !`;
+        },
+        type: "final"
+      },
+
+      // === RDV ===
+      rdv_prenom: {
+        message: "D'accord, prenons rendez-vous !\nQuel est votre prénom ?",
+        type: "text",
+        variable: "prenom_rdv",
+        suivant: "rdv_email"
+      },
+      rdv_email: {
+        message: (d) => `Merci ${d.prenom_rdv} ! Quel est votre email ?`,
+        type: "text",
+        variable: "email_rdv",
+        suivant: "rdv_telephone"
+      },
+      rdv_telephone: {
+        message: "Et votre numéro de téléphone ?",
+        type: "text",
+        variable: "telephone_rdv",
+        suivant: "rdv_redirect"
+      },
+      rdv_redirect: {
+        message: (d) => {
+          const calendlyURL = `${CALENDLY_URL}?name=${encodeURIComponent(d.prenom_rdv)}&email=${encodeURIComponent(d.email_rdv)}&a1=${encodeURIComponent(d.telephone_rdv)}`;
+
+          setTimeout(() => {
+            const wrap = document.createElement("div");
+            wrap.style.cssText = "display:flex; justify-content:flex-start; margin: 10px 0 18px 44px;";
+
+            const btn = document.createElement("a");
             btn.href = calendlyURL;
-            btn.target = '_blank';
-            btn.textContent = '📅 Cliquer ici pour prendre rendez-vous';
-            btn.style.cssText = 'background: #c4a77d; color: white; padding: 14px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center; display: inline-block; transition: all 0.3s;';
-            
-            btn.addEventListener('mouseover', () => btn.style.background = '#b39872');
-            btn.addEventListener('mouseout', () => btn.style.background = '#c4a77d');
-            
-            btnDiv.appendChild(btn);
-            chatMessages.appendChild(btnDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 500);
-        
-        return `Parfait ${d.prenom_rdv} !\nVous pouvez cliquer sur le bouton ci-dessous pour avoir accès à notre agenda et planifier votre rendez-vous.`;
-    },
-    type: "final"
-},
+            btn.target = "_blank";
+            btn.textContent = "📅 Prendre rendez-vous";
+            btn.style.cssText =
+              "background:#c4a77d;color:white;padding:12px 14px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;";
 
-// === PARCOURS FAQ ===
-faq_question: {
-    message: "Posez-moi votre question, je vous réponds 😊",
-    type: "text",
-    variable: "faq_question",
-    suivant: "faq_reponse"
-},
-faq_reponse: {
-    message: async (d) => {
-        // Envoyer la question à OpenAI via Make.com
-        const reponse = await envoyerQuestionOpenAI(d.faq_question);
-        
-        if (reponse) {
-            return `${reponse}\n\nQue souhaitez-vous faire ?`;
+            wrap.appendChild(btn);
+            chatMessages.appendChild(wrap);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }, 250);
+
+          return `Parfait ${d.prenom_rdv} !\nCliquez sur le bouton ci-dessous pour réserver votre créneau.`;
+        },
+        type: "final"
+      },
+
+      // === FAQ ===
+      faq_question: {
+        message: "Posez-moi votre question, je vous réponds 😊",
+        type: "text",
+        variable: "faq_question",
+        suivant: "faq_reponse"
+      },
+      faq_reponse: {
+        message: async (d) => {
+          const reponse = await envoyerQuestionOpenAI(d.faq_question);
+          return `${reponse}\n\nQue souhaitez-vous faire ?`;
+        },
+        type: "buttons",
+        options: [
+          { texte: "Prendre un rendez-vous", valeur: "rdv", suivant: "rdv_prenom" },
+          { texte: "Décrire mon projet", valeur: "projet", suivant: "info_prenom" },
+          { texte: "Poser une autre question", valeur: "autre_faq", suivant: "faq_question" }
+        ]
+      }
+    };
+
+    // === VARIABLES & DOM ===
+    let etapeActuelle = "accueil";
+    let donneesUtilisateur = {};
+
+    const chatMessages = document.getElementById("chatMessages");
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const chatInput = document.getElementById("chatInput");
+
+    // === UI ===
+    function ajouterMessage(texte, estUtilisateur) {
+      if (estUtilisateur) {
+        const container = document.createElement("div");
+        container.className = "user-message-container";
+
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message user";
+        messageDiv.textContent = texte;
+
+        container.appendChild(messageDiv);
+        chatMessages.appendChild(container);
+      } else {
+        const container = document.createElement("div");
+        container.className = "message-container";
+
+        const avatar = document.createElement("div");
+        avatar.className = "avatar";
+        avatar.innerHTML = `<img src="${LOGO_URL}" alt="NOGA">`;
+
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message";
+        messageDiv.textContent = texte;
+
+        container.appendChild(avatar);
+        container.appendChild(messageDiv);
+        chatMessages.appendChild(container);
+      }
+
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function afficherTyping() {
+      // évite doublons
+      if (document.querySelector(".typing-indicator")) return;
+
+      const typingDiv = document.createElement("div");
+      typingDiv.className = "typing-indicator";
+      typingDiv.innerHTML = "<span></span><span></span><span></span>";
+      chatMessages.appendChild(typingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function retirerTyping() {
+      const typingDiv = document.querySelector(".typing-indicator");
+      if (typingDiv) typingDiv.remove();
+    }
+
+    function afficherBoutons(options) {
+      const wrap = document.createElement("div");
+      wrap.className = "response-buttons-wrap";
+
+      const buttonsDiv = document.createElement("div");
+      buttonsDiv.className = "response-buttons";
+
+      options.forEach((option) => {
+        const btn = document.createElement("button");
+        btn.className = "response-btn";
+        btn.textContent = option.texte;
+
+        btn.onclick = () => {
+          ajouterMessage(option.texte, true);
+          sauvegarderReponse(option.valeur);
+          allerEtape(option.suivant);
+          wrap.remove();
+        };
+
+        buttonsDiv.appendChild(btn);
+      });
+
+      wrap.appendChild(buttonsDiv);
+      chatMessages.appendChild(wrap);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function sauvegarderReponse(valeur) {
+      const etape = parcours[etapeActuelle];
+      if (etape.variable) donneesUtilisateur[etape.variable] = valeur;
+    }
+
+    async function allerEtape(nouvelleEtape) {
+      etapeActuelle = nouvelleEtape;
+      const etape = parcours[etapeActuelle];
+
+      if (etape.type === "condition") {
+        const prochaine = etape.condition(donneesUtilisateur);
+        return allerEtape(prochaine);
+      }
+
+      afficherTyping();
+
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 220));
+
+        const message =
+          typeof etape.message === "function"
+            ? await etape.message(donneesUtilisateur)
+            : etape.message;
+
+        if (message) ajouterMessage(message, false);
+
+        if (etape.type === "buttons") {
+          afficherBoutons(etape.options);
+          chatInput.style.display = "none";
+        } else if (etape.type === "text") {
+          chatInput.style.display = "flex";
+          messageInput.focus();
         } else {
-            return "Merci pour votre question !\n\nNous allons y répondre par email très rapidement.\n\nQue souhaitez-vous faire ?";
+          chatInput.style.display = "none";
         }
-    },
-    type: "buttons",
-    options: [
-        { texte: "Oui, prendre un rendez-vous", valeur: "rdv", suivant: "rdv_prenom" },
-        { texte: "Décrire mon projet", valeur: "projet", suivant: "info_prenom" },
-        { texte: "Poser une autre question", valeur: "autre_faq", suivant: "faq_question" }
-    ]
+      } finally {
+        retirerTyping();
+      }
     }
-};
-        
-        // === VARIABLES ===
-        let etapeActuelle = "accueil";
-        let donneesUtilisateur = {};
-        
-        // === ÉLÉMENTS DOM ===
-        const chatBubble = document.getElementById('chatBubble');
-        const chatWindow = document.getElementById('chatWindow');
-        const closeBtn = document.getElementById('closeBtn');
-        const chatMessages = document.getElementById('chatMessages');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const chatInput = document.getElementById('chatInput');
-        
-        // === FONCTIONS ===
-        function ajouterMessage(texte, estUtilisateur) {
-            if (estUtilisateur) {
-                const container = document.createElement('div');
-                container.className = 'user-message-container';
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message user';
-                messageDiv.textContent = texte;
-                container.appendChild(messageDiv);
-                chatMessages.appendChild(container);
-            } else {
-                const container = document.createElement('div');
-                container.className = 'message-container';
-                
-                const avatar = document.createElement('div');
-                avatar.className = 'avatar';
-                avatar.innerHTML = `<img src="${LOGO_URL}" alt="NOGA">`;
-                
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message';
-                messageDiv.textContent = texte;
-                
-                container.appendChild(avatar);
-                container.appendChild(messageDiv);
-                chatMessages.appendChild(container);
-            }
-            
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        function afficherTyping() {
-            const typingDiv = document.createElement('div');
-            typingDiv.className = 'typing-indicator';
-            typingDiv.id = 'typing';
-            typingDiv.innerHTML = '<span></span><span></span><span></span>';
-            chatMessages.appendChild(typingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        function retirerTyping() {
-            const typingDiv = document.getElementById('typing');
-            if (typingDiv) typingDiv.remove();
-        }
-        
-        function afficherBoutons(options) {
-            const buttonsDiv = document.createElement('div');
-            buttonsDiv.className = 'response-buttons';
-            
-            options.forEach((option) => {
-                const btn = document.createElement('button');
-                btn.className = 'response-btn';
-                btn.textContent = option.texte;
-                btn.onclick = () => {
-                    ajouterMessage(option.texte, true);
-                    sauvegarderReponse(option.valeur);
-                    allerEtape(option.suivant);
-                    buttonsDiv.remove();
-                };
-                buttonsDiv.appendChild(btn);
-            });
-            
-            chatMessages.appendChild(buttonsDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        function sauvegarderReponse(valeur) {
-            const etape = parcours[etapeActuelle];
-            if (etape.variable) {
-                donneesUtilisateur[etape.variable] = valeur;
-            }
-            console.log('💾 Données:', donneesUtilisateur);
-        }
-        
-        async function allerEtape(nouvelleEtape) {
-            etapeActuelle = nouvelleEtape;
-            const etape = parcours[etapeActuelle];
-            
-            if (etape.type === "condition") {
-                const prochaine = etape.condition(donneesUtilisateur);
-                allerEtape(prochaine);
-                return;
-            }
-            
-            afficherTyping();
-            
-            setTimeout(async () => {
-    // NE PAS retirer le typing ici !
-    
-    const message = typeof etape.message === 'function' 
-        ? await etape.message(donneesUtilisateur)  // Attend OpenAI avec typing visible
-        : etape.message;
-    
-    // Retirer le typing APRÈS avoir reçu la réponse
-    retirerTyping();
-    
-    if (message) {
-        ajouterMessage(message, false);
-    }
-    
-    if (etape.type === "buttons") {
-        afficherBoutons(etape.options);
-        chatInput.style.display = 'none';
-    } else if (etape.type === "text") {
-        chatInput.style.display = 'flex';
-        messageInput.focus();
-    } else if (etape.type === "final") {
-        chatInput.style.display = 'none';
-    }
-}, 200);
-        }
-        
-        async function envoyerAMake(donnees, type) {
-    const payload = {
-        type: type,
-        ...donnees,
-        date: new Date().toISOString(),
-        source: 'Chat NOGA'
-    };
-    
-    console.log('📤 Envoi à Make.com (Projet):', payload);
-    
-    try {
-        const response = await fetch(WEBHOOK_PROJET_URL, {  // ← WEBHOOK_PROJET_URL
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+
+    async function envoyerAMake(donnees, type) {
+      const payload = { type, ...donnees, date: new Date().toISOString(), source: "Chat NOGA" };
+      try {
+        const response = await fetch(WEBHOOK_PROJET_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
-        
-        if (response.ok) {
-            console.log('✅ Projet envoyé !');
-            return true;
-        }
-    } catch (error) {
-        console.error('❌ Erreur:', error);
+        return response.ok;
+      } catch {
+        return false;
+      }
     }
-    return false;
-}
 
+    async function envoyerQuestionOpenAI(question) {
+      const payload = {
+        question,
+        contexte: "NOGA Architecture - Cabinet d'architecture d'intérieur sur la Côte d'Azur",
+      };
 
-async function envoyerQuestionOpenAI(question) {
-    const payload = {
-        question: question,
-        contexte: "NOGA Architecture - Cabinet d'architecture d'intérieur sur la Côte d'Azur"
-    };
-
-    try {
+      try {
         const response = await fetch(WEBHOOK_FAQ_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
 
-        console.log('📡 Status:', response.status);
-        
-        if (!response.ok) {
-            console.error("❌ Erreur HTTP:", response.status);
-            return "Désolé, une erreur est survenue.";
-        }
-
+        if (!response.ok) return "Désolé, une erreur est survenue.";
         const texte = await response.text();
-        console.log('✅ Texte brut:', texte);
-        
-        if (!texte || texte.trim() === "") {
-            return "Je n'ai pas pu obtenir de réponse.";
-        }
-
-        // Nettoyage
-        const cleaned = texte.replace(/^["']|["']$/g, "").trim();
-        console.log('✅ Texte nettoyé:', cleaned);
-        
-        return cleaned;
-        
-    } catch (error) {
-        console.error("❌ Erreur fetch:", error);
+        const cleaned = (texte || "").replace(/^["']|["']$/g, "").trim();
+        return cleaned || "Je n'ai pas pu obtenir de réponse.";
+      } catch (error) {
         return "Erreur de connexion.";
+      }
     }
-}
-        
-        // === ÉVÉNEMENTS ===
-        // Ouvrir automatiquement si dans une iframe
-if (window.self !== window.top) {
-    chatWindow.style.display = 'flex';
-    chatBubble.style.display = 'none';
-    if (chatMessages.children.length === 0) {
-        allerEtape('accueil');
-    }
-}
 
-chatBubble.addEventListener('click', () => {
-            chatWindow.style.display = 'flex';
-            if (chatMessages.children.length === 0) {
-                allerEtape('accueil');
-            }
-        });
-        
-        closeBtn.addEventListener('click', () => {
-            chatWindow.style.display = 'none';
-        });
-        
-        sendBtn.addEventListener('click', () => {
-            const message = messageInput.value.trim();
-            if (message) {
-                ajouterMessage(message, true);
-                sauvegarderReponse(message);
-                messageInput.value = '';
-                
-                const etape = parcours[etapeActuelle];
-                if (etape.suivant) {
-                    allerEtape(etape.suivant);
-                }
-            }
-        });
-        
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendBtn.click();
-            }
-        });
-    </script>
+    // === EVENTS ===
+    sendBtn.addEventListener("click", () => {
+      const message = messageInput.value.trim();
+      if (!message) return;
+
+      ajouterMessage(message, true);
+      sauvegarderReponse(message);
+      messageInput.value = "";
+
+      const etape = parcours[etapeActuelle];
+      if (etape.suivant) allerEtape(etape.suivant);
+    });
+
+    messageInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendBtn.click();
+    });
+
+    // start
+    allerEtape("accueil");
+  </script>
 </body>
 </html>
