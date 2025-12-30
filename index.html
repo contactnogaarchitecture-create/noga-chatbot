@@ -7,242 +7,232 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f3f0;
-      height: 100vh;
-      overflow: hidden; /* important dans une iframe */
-    }
-
-    /* On affiche directement la fenêtre (pas de bulle ici) */
-    #chatWindow {
-      width: 100%;
-      height: 100vh;
-      background: #f5f3f0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    #chatMessages {
-      flex: 1;
-      padding: 26px 18px;
-      overflow-y: auto;
-      background: #f5f3f0;
-      overflow-x: hidden;
-    }
-
-    .message-container {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      margin-bottom: 18px;
-      animation: fadeIn 0.25s;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .avatar {
-      width: 34px;
-      height: 34px;
-      flex-shrink: 0;
-      background: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-    .avatar img { width: 34px; height: 34px; object-fit: contain; }
-
-    .message {
-      background: white;
-      color: #5a4a3a;
-      padding: 14px 16px;
-      border-radius: 12px;
-      max-width: 80%;
-      white-space: pre-line;
-      line-height: 1.55;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      border: 1px solid #e5e3e0;
-      font-size: 16px;
-    }
-
-    .user-message-container {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 14px;
-    }
-
-    .message.user {
-      background: #c4a77d;
-      color: white;
-      border: none;
-      max-width: 80%;
-      font-size: 16px;
-      padding: 14px 16px;
-      border-radius: 12px;
-    }
-
-    /* ✅ Boutons alignés à droite comme des réponses */
-    .response-buttons-wrap {
-      display: flex;
-      justify-content: flex-end;
-      margin: 10px 0 18px 0;
-    }
-
-    .response-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-width: 210px;   /* moins large */
-      width: 100%;
-      align-items: stretch;
-    }
-
-    .response-btn {
-      background: #c4a77d;
-      color: white;
-      border: none;
-      padding: 12px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-      font-size: 14px;
-      font-weight: 500;
-      width: 100%;
-    }
-
-    .response-btn:hover {
-      background: #b39872;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(196,167,125,0.25);
-    }
-
-    #chatInput {
-      padding: 16px;
-      background: white;
-      border-top: 1px solid #e5e3e0;
-      display: none;
-      gap: 10px;
-    }
-
-    #messageInput {
-      flex: 1;
-      padding: 12px 14px;
-      border: 1px solid #e5e3e0;
-      border-radius: 10px;
-      font-size: 14px;
-      outline: none;
-      background: #f5f3f0;
-      color: #5a4a3a;
-    }
-
-    #messageInput:focus {
-      border-color: #c4a77d;
-      background: white;
-    }
-
-    #sendBtn {
-      background: #c4a77d;
-      color: white;
-      border: none;
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-weight: 700;
-      cursor: pointer;
-      font-size: 15px;
-    }
-    #sendBtn:hover { background: #b39872; }
-
-    .typing-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 14px;
-      background: white;
-      border-radius: 12px;
-      border: 1px solid #e5e3e0;
-      width: fit-content;
-      margin: 0 0 14px 44px; /* sous les messages bot (avatar présent desktop) */
-    }
-
-    .typing-indicator span {
-      width: 7px;
-      height: 7px;
-      background: #c4a77d;
-      border-radius: 50%;
-      animation: typing 1.2s infinite;
-      opacity: 0.7;
-    }
-    .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
-    .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
-
-    @keyframes typing {
-      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-      30% { transform: translateY(-6px); opacity: 1; }
-    }
-
-    /* ✅ Mobile : police plus petite + avatar masqué */
-    @media (max-width: 768px) {
-      #chatMessages { padding: 16px 14px; }
-
-      .message-container { gap: 0; }
-
-      .message, .message.user { font-size: 12px; padding: 10px 12px; }
-      .response-btn { font-size: 12px; padding: 9px 12px; }
-      #messageInput { font-size: 13px; }
-
-      .typing-indicator { margin-left: 0; }
-      .response-buttons { max-width: 190px; } /* garde à droite sans prendre toute la largeur */
-    }
-
-    /* Forcer avatar visible sur desktop */
-@media (min-width: 769px) {
-  .avatar {
-    display: flex !important;
-  }
+html, body {
+  height: 100%;
+  overflow: hidden;
 }
-    /* ===== Fix hauteur iOS iframe (évite l'input coupé) ===== */
-html, body { height: 100%; }
-#chatWindow { height: 100%; } /* pas 100vh */
 
-/* utilise dvh si dispo (meilleure gestion mobile) */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f3f0;
+}
+
+/* Fenêtre chat dans iframe */
+#chatWindow {
+  width: 100%;
+  height: 100%;
+  background: #f5f3f0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* meilleure hauteur mobile */
 @supports (height: 100dvh) {
   #chatWindow { height: 100dvh; }
 }
 
-/* Safe area iPhone : évite que "Envoyer" soit sous la barre */
-#chatInput {
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+#chatMessages {
+  flex: 1;
+  min-height: 0; /* ✅ IMPORTANT iOS : évite input coupé */
+  padding: 26px 18px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #f5f3f0;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* ===== VRAI MOBILE (tactile) : PAS basé sur la largeur iframe ===== */
+/* Messages bot */
+.message-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;              /* ✅ espace avatar <-> texte */
+  margin-bottom: 18px;
+  animation: fadeIn 0.25s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avatar img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.message {
+  background: white;
+  color: #5a4a3a;
+  padding: 14px 16px;
+  border-radius: 12px;
+  max-width: 80%;
+  white-space: pre-line;
+  line-height: 1.55;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid #e5e3e0;
+  font-size: 16px;
+}
+
+/* Messages user */
+.user-message-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+
+.message.user {
+  background: #c4a77d;
+  color: white;
+  border: none;
+  max-width: 80%;
+  font-size: 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+/* Boutons choix alignés à droite */
+.response-buttons-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin: 10px 0 18px 0;
+}
+
+.response-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 210px;
+  width: 100%;
+  align-items: stretch;
+}
+
+.response-btn {
+  background: #c4a77d;
+  color: white;
+  border: none;
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  font-size: 15px;        /* ✅ taille boutons desktop */
+  font-weight: 500;
+  width: 100%;
+}
+
+.response-btn:hover {
+  background: #b39872;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(196,167,125,0.25);
+}
+
+/* Input */
+#chatInput {
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom)); /* ✅ iPhone */
+  background: white;
+  border-top: 1px solid #e5e3e0;
+  display: none;
+  gap: 10px;
+}
+
+#messageInput {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #e5e3e0;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  background: #f5f3f0;
+  color: #5a4a3a;
+}
+
+#messageInput:focus {
+  border-color: #c4a77d;
+  background: white;
+}
+
+#sendBtn {
+  background: #c4a77d;
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#sendBtn:hover { background: #b39872; }
+
+/* Typing */
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e5e3e0;
+  width: fit-content;
+  margin: 0 0 14px 50px; /* ≈ avatar + gap */
+}
+
+.typing-indicator span {
+  width: 7px;
+  height: 7px;
+  background: #c4a77d;
+  border-radius: 50%;
+  animation: typing 1.2s infinite;
+  opacity: 0.7;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ===== VRAI MOBILE (tactile) ===== */
 @media (hover: none) and (pointer: coarse) {
   .avatar { display: none !important; }
   .message-container { gap: 0 !important; }
 
   .message, .message.user {
-    font-size: 12.5px;
+    font-size: 12px;
     padding: 10px 12px;
   }
 
+  .response-buttons { max-width: 190px; }
   .response-btn {
-    font-size: 12.5px;
+    font-size: 12px;
     padding: 9px 12px;
   }
 
-  #messageInput { font-size: 12.5px; }
+  #messageInput { font-size: 13px; }
   .typing-indicator { margin-left: 0 !important; }
 }
 
-/* ===== DESKTOP (souris) : force avatar visible même si iframe étroite ===== */
+/* ===== DESKTOP (souris) ===== */
 @media (hover: hover) and (pointer: fine) {
   .avatar { display: flex !important; }
-  .message, .message.user { font-size: 16px; } /* ta demande desktop */
+  .message, .message.user { font-size: 16px; }
+  .response-btn { font-size: 15px !important; }
 }
   </style>
 </head>
