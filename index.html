@@ -687,6 +687,16 @@ async function envoyerQuestionOpenAI(question) {
 }
         
         // === ÉVÉNEMENTS ===
+        // Ouvrir automatiquement si dans une iframe
+if (window.self !== window.top) {
+    chatWindow.style.display = 'flex';
+    chatBubble.style.display = 'none';
+    if (chatMessages.children.length === 0) {
+        allerEtape('accueil');
+    }
+}
+
+chatBubble.addEventListener('click', () => {
         chatBubble.addEventListener('click', () => {
             chatWindow.style.display = 'flex';
             if (chatMessages.children.length === 0) {
