@@ -418,8 +418,8 @@ body {
       },
       rdv_redirect: {
         message: (d) => {
-          const calendlyURL = `${CALENDLY_URL}?name=${encodeURIComponent(d.prenom_rdv)}&email=${encodeURIComponent(d.email_rdv)}&a1=${encodeURIComponent(d.telephone_rdv)}`;
-
+          btn.style.cssText =
+  "background:#c4a77d;color:white;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:500;font-size:14px;display:inline-block;transition:background 0.2s;";
           setTimeout(() => {
             const wrap = document.createElement("div");
             wrap.style.cssText = "display:flex; justify-content:flex-start; margin: 10px 0 18px 44px;";
