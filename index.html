@@ -10,20 +10,18 @@
 html, body {
   height: 100%;
   overflow: hidden;
+  background: transparent !important;  /* ← AJOUTE ÇA */
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f5f3f0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
 }
 
 /* Fenêtre chat dans iframe */
 #chatWindow {
   width: 100%;
   height: 100dvh;
-  background: rgba(245, 243, 240, 0.3);  /* ← 30% opacité */
-  backdrop-filter: blur(15px);  /* ← Effet glassmorphism */
-  -webkit-backdrop-filter: blur(15px);
+  background: transparent;  /* ← Transparent aussi */
   display: flex;
   flex-direction: column;
   overflow: hidden; 
@@ -41,7 +39,7 @@ body {
   padding-bottom: 10px;
   overflow-y: auto;
   overflow-x: hidden;
-  background: transparent;  /* ← Transparent pour voir le fond */
+  background: transparent;  /* ← Transparent */
   -webkit-overflow-scrolling: touch;
 }
 
