@@ -513,8 +513,12 @@ body {
     
     // Bot : scroll vers le HAUT du message
     setTimeout(() => {
-      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
+  const containerTop = container.offsetTop;
+  chatMessages.scrollTo({
+    top: containerTop - 20,  // 20px de marge en haut
+    behavior: 'smooth'
+  });
+}, 50);
   }
 }
     function afficherTyping() {
