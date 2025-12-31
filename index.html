@@ -417,29 +417,32 @@ body {
         suivant: "rdv_redirect"
       },
       rdv_redirect: {
-        message: (d) => {
-          btn.style.cssText =
-  "background:#c4a77d;color:white;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:500;font-size:14px;display:inline-block;transition:background 0.2s;";
-          setTimeout(() => {
-            const wrap = document.createElement("div");
-            wrap.style.cssText = "display:flex; justify-content:flex-start; margin: 10px 0 18px 44px;";
+  message: (d) => {
+    const calendlyURL = `${CALENDLY_URL}?name=${encodeURIComponent(d.prenom_rdv)}&email=${encodeURIComponent(d.email_rdv)}&a1=${encodeURIComponent(d.telephone_rdv)}`;
 
-            const btn = document.createElement("a");
-            btn.href = calendlyURL;
-            btn.target = "_blank";
-            btn.textContent = "📅 Prendre rendez-vous";
-            btn.style.cssText =
-              "background:#c4a77d;color:white;padding:12px 14px;border-radius:10px;text-decoration:none;font-weight:700;display:inline-block;";
+    setTimeout(() => {
+      const wrap = document.createElement("div");
+      wrap.style.cssText = "display:flex; justify-content:flex-start; margin: 10px 0 18px 44px;";
 
-            wrap.appendChild(btn);
-            chatMessages.appendChild(wrap);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-          }, 250);
+      const btn = document.createElement("a");
+      btn.href = calendlyURL;
+      btn.target = "_blank";
+      btn.textContent = "📅 Prendre rendez-vous";
+      btn.style.cssText =
+        "background:#c4a77d;color:white;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:500;font-size:14px;display:inline-block;transition:background 0.2s;";
 
-          return `Parfait ${d.prenom_rdv} !\nCliquez sur le bouton ci-dessous pour réserver votre créneau.`;
-        },
-        type: "final"
-      },
+      btn.addEventListener('mouseover', () => btn.style.background = '#b39872');
+      btn.addEventListener('mouseout', () => btn.style.background = '#c4a77d');
+
+      wrap.appendChild(btn);
+      chatMessages.appendChild(wrap);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 250);
+
+    return `Parfait ${d.prenom_rdv} !\nCliquez sur le bouton ci-dessous pour réserver votre créneau.`;
+  },
+  type: "final"
+},
 
       // === FAQ ===
       faq_question: {
