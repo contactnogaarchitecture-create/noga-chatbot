@@ -492,25 +492,29 @@ body {
 
         container.appendChild(messageDiv);
         chatMessages.appendChild(container);
-      } else {
-        const container = document.createElement("div");
-        container.className = "message-container";
-
-        const avatar = document.createElement("div");
-        avatar.className = "avatar";
-        avatar.innerHTML = `<img src="${LOGO_URL}" alt="NOGA">`;
-
-        const messageDiv = document.createElement("div");
-        messageDiv.className = "message";
-        messageDiv.textContent = texte;
-
-        container.appendChild(avatar);
-        container.appendChild(messageDiv);
-        chatMessages.appendChild(container);
-      }
-
       chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+  } else {
+    const container = document.createElement("div");
+    container.className = "message-container";
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.innerHTML = `<img src="${LOGO_URL}" alt="NOGA">`;
+
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "message";
+    messageDiv.textContent = texte;
+
+    container.appendChild(avatar);
+    container.appendChild(messageDiv);
+    chatMessages.appendChild(container);
+    
+    // Bot : scroll vers le HAUT du message
+    setTimeout(() => {
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+}
 
     function afficherTyping() {
       // évite doublons
