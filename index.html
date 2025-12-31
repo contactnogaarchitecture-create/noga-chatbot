@@ -482,17 +482,19 @@ body {
 
     // === UI ===
     function ajouterMessage(texte, estUtilisateur) {
-      if (estUtilisateur) {
-        const container = document.createElement("div");
-        container.className = "user-message-container";
+  if (estUtilisateur) {
+    const container = document.createElement("div");
+    container.className = "user-message-container";
 
-        const messageDiv = document.createElement("div");
-        messageDiv.className = "message user";
-        messageDiv.textContent = texte;
+    const messageDiv = document.createElement("div");
+    messageDiv.className = "message user";
+    messageDiv.textContent = texte;
 
-        container.appendChild(messageDiv);
-        chatMessages.appendChild(container);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+    container.appendChild(messageDiv);
+    chatMessages.appendChild(container);
+    
+    // User : scroll en bas (normal)
+    chatMessages.scrollTop = chatMessages.scrollHeight;
   } else {
     const container = document.createElement("div");
     container.className = "message-container";
@@ -511,10 +513,10 @@ body {
     
     // Bot : scroll vers le HAUT du message
     setTimeout(() => {
-  container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}, 50);
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
 }
-
     function afficherTyping() {
       // évite doublons
       if (document.querySelector(".typing-indicator")) return;
