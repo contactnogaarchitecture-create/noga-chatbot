@@ -229,6 +229,13 @@ body {
 
   #messageInput { font-size: 13px; }
   .typing-indicator { margin-left: 0 !important; }
+
+   /* ===== BOUTON CALENDLY MOBILE ===== */
+  a[href*="calendly"] {
+    font-size: 12px !important;
+    padding: 8px 12px !important;
+    font-weight: 500 !important;
+  }
 }
 
 /* ===== DESKTOP (souris) ===== */
@@ -429,7 +436,7 @@ body {
       btn.target = "_blank";
       btn.textContent = "📅 Prendre rendez-vous";
       btn.style.cssText =
-        "background:#c4a77d;color:white;padding:12px 14px;border-radius:10px;text-decoration:none;font-weight:500;display:inline-block";
+        "background:#c4a77d;color:white;padding:12px 14px;border-radius:10px;text-decoration:none;font-weight:600;display:inline-block";
 
       btn.addEventListener('mouseover', () => btn.style.background = '#b39872');
       btn.addEventListener('mouseout', () => btn.style.background = '#c4a77d');
